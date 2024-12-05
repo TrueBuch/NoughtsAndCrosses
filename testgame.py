@@ -1,7 +1,8 @@
 import pygame as game
+import sys
 
-screen_length = 800
-screen_width = 600
+screen_length = 500
+screen_width = 500
 screen = None
 
 game_started = True
