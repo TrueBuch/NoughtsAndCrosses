@@ -1,10 +1,12 @@
 import random
 
-game_field = 1
-player1 = 1
-player2 = 1
+game_field = ["","","","","","","","",""]
+playerx =
+playero =
 turn = random.randint(0,1)
-print(turn)
 
-123
-
+def check_field(game_field, row, player):
+    if game_field[row] == "":
+        game_field[row] == player
+        return True
+    return False
