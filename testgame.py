@@ -14,9 +14,9 @@ screen = None
 game_started = True #состояние игры
 
 #Загрузка изображений
-field = game.image.load('field.png')
-Nought = game.image.load('Nought.png')
-Cross = game.image.load('Cross.png')
+field = game.image.load('sprites/field.png')
+Nought = game.image.load('sprites/Nought.png')
+Cross = game.image.load('sprites/Cross.png')
 
 overlay = game.Surface((zone_size, zone_size), game.SRCALPHA) #Прозрачная поверхность для зон с размером 100
 
