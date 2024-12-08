@@ -79,19 +79,23 @@ while game_started:
         #Обработка наведения мыши на зону, куда можно поставить крестик/нолик
         if zone[0].collidepoint(mouse_pos) and zone[1] == 'Null':
             screen.blit(overlay, zone[0].topleft)
+            #!!!
+            #!!!
+            #[БУДЕТ ИЗМЕНЕНО] Обработка нажатия кнопки на зону, установка крестика или нолика
+            #!!!
+            #!!!
+            if game.mouse.get_pressed()[0] == True:
+                if Turn:
+                    zone[1] = 'X'
+                else: 
+                    zone[1] = 'O'
+                Turn = not(Turn)
+        # else:
+        #     if game.mouse.get_pressed()[2] == True:
+        #         zone[1] = 'Null'
 
 
-        #!!!
-        #!!!
-        #[БУДЕТ ИЗМЕНЕНО] Обработка нажатия кнопки на зону, установка крестика или нолика
-        #!!!
-        #!!!
-        if zone[0].collidepoint(mouse_pos) and zone[1] == 'Null' and game.mouse.get_pressed()[0] == True:
-            if Turn:
-                zone[1] = 'X'
-            else: 
-                zone[1] = 'O'
-            Turn = not(Turn)
+            
 
     #Обработка события закрытия игры
     for event in game.event.get():
