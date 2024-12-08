@@ -12,6 +12,7 @@ zone_size = 100 #Размер зоны для крестика/нолика
 
 screen = None
 game_started = True #состояние игры
+mouse_pressed = False
 
 #Загрузка изображений
 field = game.image.load('sprites/field.png')
@@ -84,19 +85,20 @@ while game_started:
             #[БУДЕТ ИЗМЕНЕНО] Обработка нажатия кнопки на зону, установка крестика или нолика
             #!!!
             #!!!
-            if game.mouse.get_pressed()[0] == True:
+            if game.mouse.get_pressed()[0] == True and mouse_pressed == False:
                 if Turn:
                     zone[1] = 'X'
                 else: 
                     zone[1] = 'O'
                 Turn = not(Turn)
-        # else:
-        #     if game.mouse.get_pressed()[2] == True:
-        #         zone[1] = 'Null'
+                mouse_pressed = True
+        
+        # if game.mouse.get_pressed()[2] == True:
+        #     zone[1] = 'Null'
 
-
-            
-
+    if game.mouse.get_pressed()[0] == False:
+        mouse_pressed = False
+        
     #Обработка события закрытия игры
     for event in game.event.get():
         if event.type == game.QUIT:
