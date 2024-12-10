@@ -1,5 +1,3 @@
-import random
-
 def check_field(game_field, row, player, running):  # Проверка на свободное поле + регистрация хода
     if game_field[row] == "":
         game_field[row] = player  # Используем присваивание
@@ -24,7 +22,7 @@ def check_draw(game_field):  # Проверка на ничью
 
 def main():  # Основная функция
     game_field = [""] * 9
-    turn = random.randint(0, 1)
+    turn = True
     players = ["x", "o"]
     running = [True]  # Используем список для передачи по ссылке
 
