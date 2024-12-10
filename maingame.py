@@ -11,7 +11,7 @@ screen_y = 500
 zone_size = 100 #Размер зоны для крестика/нолика
 
 screen = None
-game_status = 'menu'
+game_status = 'running'
 mouse_pressed = False
 
 #Загрузка изображений
