@@ -136,6 +136,10 @@ def game_running():
     game_status = check_win()
     turn_player = None
 
+    turn_player_overlay = game.Surface((150, 50), game.SRCALPHA)
+    turn_player_overlay_rect = turn_player_overlay.get_rect(center = (screen_x // 2, screen_y / 2 - 225))
+    game.draw.rect(turn_player_overlay, (0, 0, 0, 64), (0, 0, 150, 50), border_radius=27)
+
     if Turn:
         turn_player = sys_font.render('Ходит x', 1, (255, 255, 255))
     if not(Turn):
@@ -143,6 +147,7 @@ def game_running():
 
     turn_player_rect = turn_player.get_rect(center=(screen_x // 2, screen_y // 2 - 225))
     screen.blit(field, field_rect) #Отрисовка игрового поля в центре экрана
+    screen.blit(turn_player_overlay, turn_player_overlay_rect)
     screen.blit(turn_player, turn_player_rect)
     for id in zones:
         zone = zones.get(id)
