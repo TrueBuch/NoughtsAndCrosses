@@ -5,7 +5,7 @@ import sys
 game.init()
 
 
-sys_font = game.font.SysFont('arial', 64)
+sys_font = game.font.SysFont('impact', 32)
 
 #Размеры окна
 screen_x = 500
@@ -27,9 +27,9 @@ Cross = game.image.load('sprites/Cross.png')
 zone_overlay = game.Surface((zone_size, zone_size), game.SRCALPHA) #Прозрачная поверхность для зон с размером 100
 game.draw.rect(zone_overlay, (0, 0, 0, 64), (0, 0, zone_size, zone_size), border_radius=27) #Полупрозрачаня поверхность с закругленными краями
 
-start_button_overlay = game.Surface((300, 450), game.SRCALPHA) #Прозрачная поверхность
-start_button_overlay_rect = start_button_overlay.get_rect(center = (screen_x // 2, screen_y / 2))
-game.draw.rect(start_button_overlay, (0, 0, 0, 64), (0, 0, 300, 450), border_radius=27)
+menu_overlay = game.Surface((300, 450), game.SRCALPHA) #Прозрачная поверхность
+menu_overlay_rect = menu_overlay.get_rect(center = (screen_x // 2, screen_y / 2))
+game.draw.rect(menu_overlay, (0, 0, 0, 64), (0, 0, 300, 450), border_radius=27)
 
 screen = game.display.set_mode((screen_x, screen_y)) #Создание экрана
 
@@ -63,6 +63,153 @@ wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4,
 for id, offset in enumerate(offsets):
     zones[id] = [(game.Rect(field_rect.centerx + offset[0] - zone_size // 2, field_rect.centery + offset[1] - zone_size // 2, zone_size, zone_size)), 'Null']
 
+def reset_game():
+    global zones
+    global winner
+    global game_status
+    global Turn
+    global mouse_pressed
+    for id in zones:
+        zone = zones.get(id)
+        zone[1] = 'Null'
+    winner = None
+    Turn = True
+    game_status = 'running'
+
+def quit_game():
+    global running
+    global game_status
+    game_status = 'quit'
+    running = False
+    game.quit()
+    sys.exit()
+
+
+def menu_game():
+    global game_status
+    global mouse_pressed
+    global sys_font
+    screen.blit(menu_overlay, menu_overlay_rect)
+
+    text_title_game = sys_font.render('Крестики - Нолики', 1, (255, 255, 255))
+    text_title_game_rect = text_title_game.get_rect(center=(screen_x // 2, screen_y // 2 - 150))
+
+    text_start_game = sys_font.render('Играть', 1, (255, 255, 255))
+    text_start_game_rect = text_start_game.get_rect(center=(screen_x // 2, screen_y // 2))
+
+    text_quit_game = sys_font.render('Выход', 1, (255, 255, 255))
+    text_quit_game_rect = text_quit_game.get_rect(center=(screen_x // 2, screen_y // 2 + 150))
+
+    start_button_overlay = game.Surface((250, 100), game.SRCALPHA)
+    start_button_rect = start_button_overlay.get_rect(center = (screen_x // 2, screen_y / 2))
+    game.draw.rect(start_button_overlay, (152, 252, 152, 200), (0, 0, 250, 100), border_radius=27)
+
+    quit_button_overlay = game.Surface((250, 100), game.SRCALPHA)
+    quit_button_rect = quit_button_overlay.get_rect(center = (screen_x // 2, screen_y / 2 + 150))
+    game.draw.rect(quit_button_overlay, (255, 86, 86, 200), (0, 0, 250, 100), border_radius=27)
+    
+
+    screen.blit(quit_button_overlay, quit_button_rect)
+    screen.blit(text_quit_game, text_quit_game_rect)
+    screen.blit(text_title_game, text_title_game_rect)
+    screen.blit(start_button_overlay, start_button_rect)
+    screen.blit(text_start_game, text_start_game_rect)
+        
+    if game.mouse.get_pressed()[0] == False and start_button_rect.collidepoint(mouse_pos):
+        game.draw.rect(start_button_overlay, (0, 0, 0, 64), (0, 0, 250, 100), border_radius=27)
+        screen.blit(start_button_overlay, start_button_rect)
+    if game.mouse.get_pressed()[0] == True and start_button_rect.collidepoint(mouse_pos) and mouse_pressed == False:
+        mouse_pressed = True
+        game_status = 'running'
+
+    if game.mouse.get_pressed()[0] == False and quit_button_rect.collidepoint(mouse_pos):
+        game.draw.rect(quit_button_overlay, (0, 0, 0, 64), (0, 0, 250, 100), border_radius=27)
+        screen.blit(quit_button_overlay, quit_button_rect)
+    if game.mouse.get_pressed()[0] == True and quit_button_rect.collidepoint(mouse_pos) and mouse_pressed == False:
+        quit_game()
+
+def game_running():
+    global game_status
+    global mouse_pressed
+    global Turn
+    global sys_font
+    game_status = check_win()
+    turn_player = None
+
+    if Turn:
+        turn_player = sys_font.render('Ходит x', 1, (255, 255, 255))
+    if not(Turn):
+        turn_player = sys_font.render('Ходит o', 1, (255, 255, 255))
+
+    turn_player_rect = turn_player.get_rect(center=(screen_x // 2, screen_y // 2 - 225))
+    screen.blit(field, field_rect) #Отрисовка игрового поля в центре экрана
+    screen.blit(turn_player, turn_player_rect)
+    for id in zones:
+        zone = zones.get(id)
+
+        # Отрисовка крестиков и ноликов, если они имеются на поле
+        if zone[1] == 'X':
+            screen.blit(Cross, zone[0].topleft)
+        if zone[1] == 'O':
+            screen.blit(Nought, zone[0].topleft)
+
+        #Обработка наведения мыши на зону, куда можно поставить крестик/нолик
+        if zone[0].collidepoint(mouse_pos) and zone[1] == 'Null':
+            screen.blit(zone_overlay, zone[0].topleft)
+            if game.mouse.get_pressed()[0] == True and mouse_pressed == False:
+                if Turn:
+                    zone[1] = 'X'
+                else: 
+                    zone[1] = 'O'
+                Turn = not(Turn)
+
+def game_end():
+    global Turn
+    global game_status
+    global mouse_pressed
+    global sys_font
+    screen.blit(menu_overlay, menu_overlay_rect)
+
+    text_end_game = sys_font.render('Игра окончена', 1, (255, 255, 255))
+    text_winner = sys_font.render(winner, 1, (0, 255 ,0))
+    text_restart_game = sys_font.render('Играть снова', 1, (255, 255, 255))
+
+    text_quit_game = sys_font.render('Выход', 1, (255, 255, 255))
+    text_quit_game_rect = text_quit_game.get_rect(center=(screen_x // 2, screen_y // 2 + 150))
+
+    text_end_game_rect = text_end_game.get_rect(center=(screen_x // 2, screen_y // 2 - 150))
+    text_winner_rect = text_end_game.get_rect(center=(screen_x // 2, screen_y // 2 - 100))
+    text_restart_game_rect = text_restart_game.get_rect(center=(screen_x // 2, screen_y // 2))
+    
+    start_button_overlay = game.Surface((250, 100), game.SRCALPHA)
+    start_button_rect = start_button_overlay.get_rect(center = (screen_x // 2 , screen_y // 2))
+    game.draw.rect(start_button_overlay, (152, 255, 152, 200), (0, 0, 250, 100), border_radius=27)
+
+    quit_button_overlay = game.Surface((250, 100), game.SRCALPHA)
+    quit_button_rect = quit_button_overlay.get_rect(center = (screen_x // 2, screen_y // 2 + 150))
+    game.draw.rect(quit_button_overlay, (255, 86, 86, 200), (0, 0, 250, 100), border_radius=27)
+
+    screen.blit(quit_button_overlay, quit_button_rect)
+    screen.blit(start_button_overlay, start_button_rect)
+
+    screen.blit(text_end_game, text_end_game_rect)
+    screen.blit(text_quit_game, text_quit_game_rect)
+    screen.blit(text_winner, text_winner_rect)
+    screen.blit(text_restart_game, text_restart_game_rect)
+    if game.mouse.get_pressed()[0] == False and start_button_rect.collidepoint(mouse_pos):
+        game.draw.rect(start_button_overlay, (0, 0, 0, 64), (0, 0, 250, 100), border_radius=27)
+        screen.blit(start_button_overlay, start_button_rect)
+
+    if game.mouse.get_pressed()[0] == True and start_button_rect.collidepoint(mouse_pos) and mouse_pressed == False:
+        reset_game()
+
+    if game.mouse.get_pressed()[0] == False and quit_button_rect.collidepoint(mouse_pos):
+        game.draw.rect(quit_button_overlay, (0, 0, 0, 64), (0, 0, 250, 100), border_radius=27)
+        screen.blit(quit_button_overlay, quit_button_rect)
+    if game.mouse.get_pressed()[0] == True and quit_button_rect.collidepoint(mouse_pos) and mouse_pressed == False:
+        quit_game()
+    
+
 def check_win():  # Проверка на победу
     global zones
     global wins
@@ -70,8 +217,7 @@ def check_win():  # Проверка на победу
     posX = []
     posO = []
     counter = 0
-    
-    
+
     for id in zones:
         zone = zones.get(id)
         if zone[1] == 'X':
@@ -82,141 +228,41 @@ def check_win():  # Проверка на победу
             counter += 1
     for i in wins:
         if all([j in posX for j in i]):
-            winner = 'Победа X'
+            winner = 'Победа: Крестики'
             return 'end_game'
         if all([j in posO for j in i]):
-            winner = 'Победа O'
+            winner = 'Победа: Нолики'
             return 'end_game'
     if counter == 9:
         winner = 'Ничья'
         return 'end_game'
     return 'running'
 
-# def main():  # Основная функция
-#     game_field = [""] * 9
-#     turn = True
-#     players = ["x", "o"]
-#     running = [True]  # Используем список для передачи по ссылке
-
-#     while running[0]:
-#         current_player = players[turn]
-#         print(f"Ход игрока {current_player}:")
-#         while True:
-#             try:
-#                 move = int(input("Введите номер ячейки (0-8): "))
-#                 if 0 <= move < 9 and check_field(game_field, move, current_player, running):
-#                     break
-#             except ValueError:
-#                 print("Пожалуйста, введите число от 0 до 8.")
-        
-#         turn = 1 - turn  # Смена игрока
-
-#     # Выводим результат после завершения игры
-#     print("Игровое поле:")
-#     for i in range(0, 9, 3):
-#         print(game_field[i:i+3])  # Отображение игрового поля
-
-#     # Проверяем, кто выиграл
-#     result = check_win(game_field, players[0])  # Проверяем для первого игрока
-#     if result == "Игра продолжается":
-#         result = check_win(game_field, players[1])  # Проверяем для второго игрока
-#     print(result)
-
-# if __name__ == "__main__":
-#     main()
-
-
-
-
-
-
-
-# def main():
-#     game_field = ["" for _ in range(9)]
-#     turn = random.randint(0,1)
-#     playero = "o"
-#     playerx = "x"
-#     if turn:
-#         print("Player x")
-#         check_field(game_field, int(input()), playerx)
-#     else:
-#         print("Player o")
-#         check_field(game_field, int(input()), playero)
-# main()
-
 while running:
-    print(game_status)
     mouse_pos = game.mouse.get_pos() #Координаты мыши
-    # print(mouse_pos)
-
-    screen.fill((0, 154, 100)) #Заполнение экрана цветов
+    screen.fill((0, 154, 100)) #Заполнение экрана цветом
 
 
     if game_status == 'menu':
+        menu_game()
         
-        
-        screen.blit(start_button_overlay, start_button_overlay_rect)
-        
-        if game.mouse.get_pressed()[0] == True and start_button_overlay_rect.collidepoint(mouse_pos):
-            game_status = 'running'
-            mouse_pressed = True
-        
-
     if game_status == 'running':
-        game_status = check_win()
-        screen.blit(field, field_rect) #Отрисовка игрового поля в центре экрана
-        for id in zones:
-            zone = zones.get(id)
+        game_running()
 
-            # Отрисовка крестиков и ноликов, если они имеются на поле
-            if zone[1] == 'X':
-                screen.blit(Cross, zone[0].topleft)
-            if zone[1] == 'O':
-                screen.blit(Nought, zone[0].topleft)
-
-            #Обработка наведения мыши на зону, куда можно поставить крестик/нолик
-            if zone[0].collidepoint(mouse_pos) and zone[1] == 'Null':
-                screen.blit(zone_overlay, zone[0].topleft)
-                #!!!
-                #!!!
-                #[БУДЕТ ИЗМЕНЕНО] Обработка нажатия кнопки на зону, установка крестика или нолика
-                #!!!
-                #!!!
-                if game.mouse.get_pressed()[0] == True and mouse_pressed == False:
-                    if Turn:
-                        zone[1] = 'X'
-                    else: 
-                        zone[1] = 'O'
-                    Turn = not(Turn)
-                    mouse_pressed = True
-            
-            if game.mouse.get_pressed()[2] == True:
-                Turn = True
-                zone[1] = 'Null'
-
-    
     if game_status == 'end_game':
-        screen.blit(start_button_overlay, start_button_overlay_rect)
-        sys_text = sys_font.render(winner, 1, (255, 0, 0))
-        sys_text_rect = sys_text.get_rect(center=(screen_x // 2, screen_y // 2 - 150))
-        screen.blit(sys_text, sys_text_rect)
-        if game.mouse.get_pressed()[0] == True and start_button_overlay_rect.collidepoint(mouse_pos) and mouse_pressed == False:
-            for id in zones:
-                zone = zones.get(id)
-                zone[1] = 'Null'
-            Turn = True
-            game_status = 'running'
-            mouse_pressed = True
+        game_end()
+
     
-    if game.mouse.get_pressed()[0] == False:
+    if game.mouse.get_pressed()[0] == True and mouse_pressed == False:
+            mouse_pressed = True
+    if game.mouse.get_pressed()[0] == False and mouse_pressed == True:
             mouse_pressed = False
-        
-    #Обработка события закрытия игры
+    print(game_status)
+    
+    
     for event in game.event.get():
         if event.type == game.QUIT:
-            game_started = False
-            game.quit()
-            sys.exit()
-
-    game.display.update() #[БУДЕТ ИЗМЕНЕНО] Обновление экрана
+            quit_game()
+            
+    game.display.update()
 
