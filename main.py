@@ -5,7 +5,7 @@ import sys
 game.init()
 
 
-sys_font = game.font.SysFont('impact', 32)
+sys_font = game.font.Font('fonts/font.ttf', 32)
 
 #Размеры окна
 screen_x = 500
@@ -32,6 +32,7 @@ menu_overlay_rect = menu_overlay.get_rect(center = (screen_x // 2, screen_y / 2)
 game.draw.rect(menu_overlay, (0, 0, 0, 64), (0, 0, 300, 450), border_radius=27)
 
 screen = game.display.set_mode((screen_x, screen_y)) #Создание экрана
+game.display.set_caption("Noughts And Crosses")
 
 field_rect = field.get_rect(center = (screen_x // 2, screen_y / 2)) #Получение объекта класса Rect, с местоположением в центре экрана
 
