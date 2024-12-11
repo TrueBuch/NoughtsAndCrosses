@@ -12,14 +12,17 @@
 за основу взята библиотека PyGame.
 Код представляет из себя набор функций, определяющих состояние игры
 
-* главное меню
-![alt text](readme-images/image.png)
+ главное меню
+ ___
+ ![alt text](readme-images/image.png)
 
-* игра запущена
-![alt text](readme-images/image-1.png)
+ игра запущена
+ ___
+ ![alt text](readme-images/image-1.png)
 
-* конец игры
-![alt text](readme-images/image-2.png)
+ конец игры
+ ___
+ ![alt text](readme-images/image-2.png)
 
 
 Запуск игры
